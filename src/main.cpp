@@ -25,7 +25,6 @@ int main(int argc, char** argv) {
     }
 
     FilePath applicationPath(argv[0]);
-
     Program ObjProgram = (loadProgram(applicationPath.dirPath() + "shaders/3D.vs.glsl",
                               applicationPath.dirPath() + "shaders/normal.fs.glsl"));
     ObjProgram.use();
@@ -35,10 +34,10 @@ int main(int argc, char** argv) {
     GLint uNormalMatrix = glGetUniformLocation(ObjProgram.getGLId(), "uNormalMatrix");
     //GLint uObjTexture = glGetUniformLocation(ObjProgram.getGLId(), "uTexture");
 
-    glEnable(GL_DEPTH_TEST);
-
     std::cout << "OpenGL Version : " << glGetString(GL_VERSION) << std::endl;
     std::cout << "GLEW Version : " << glewGetString(GLEW_VERSION) << std::endl;
+
+    glEnable(GL_DEPTH_TEST);
 
     /*********************************
      * HERE SHOULD COME THE INITIALIZATION CODE
@@ -50,7 +49,6 @@ int main(int argc, char** argv) {
 
     // Déclaration de matrices
     glm::mat4 ProjMatrix = glm::perspective(glm::radians(70.f), 800.0f/600.0f, 0.1f, 100.f);
-
     glm::mat4 MVMatrix = glm::translate(glm::mat4(1.f) , glm::vec3(0., 0. , -5.));
     glm::mat4 NormalMatrix = glm::transpose(glm::inverse(MVMatrix));
     glm::mat4 MVPMatrix = ProjMatrix*MVMatrix;
