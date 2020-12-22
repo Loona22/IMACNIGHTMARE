@@ -10,6 +10,7 @@
 #include "glimac/FreeflyCamera.hpp"
 
 #include "model.hpp"
+#include "light.hpp"
 
 using namespace glimac;
 
@@ -25,7 +26,6 @@ int main(int argc, char** argv) {
     }
 
     FilePath applicationPath(argv[0]);
-
     Program ObjProgram = (loadProgram(applicationPath.dirPath() + "shaders/3D.vs.glsl",
                               applicationPath.dirPath() + "shaders/normal.fs.glsl"));
     ObjProgram.use();
@@ -35,10 +35,14 @@ int main(int argc, char** argv) {
     GLint uNormalMatrix = glGetUniformLocation(ObjProgram.getGLId(), "uNormalMatrix");
     //GLint uObjTexture = glGetUniformLocation(ObjProgram.getGLId(), "uTexture");
 
-    glEnable(GL_DEPTH_TEST);
+    ponctLightProgram ponctLightProgram(applicationPath);
+
+    dirLightProgram dirLightProgram(applicationPath);
 
     std::cout << "OpenGL Version : " << glGetString(GL_VERSION) << std::endl;
     std::cout << "GLEW Version : " << glewGetString(GLEW_VERSION) << std::endl;
+
+    glEnable(GL_DEPTH_TEST);
 
     /*********************************
      * HERE SHOULD COME THE INITIALIZATION CODE
@@ -47,10 +51,10 @@ int main(int argc, char** argv) {
     // Initialisation objet
     std::string fileCube = "/home/loona/Bureau/Projet/GLImac-Template/assets/models/cube.obj";
     Model cube(fileCube);
+    
 
     // Déclaration de matrices
     glm::mat4 ProjMatrix = glm::perspective(glm::radians(70.f), 800.0f/600.0f, 0.1f, 100.f);
-
     glm::mat4 MVMatrix = glm::translate(glm::mat4(1.f) , glm::vec3(0., 0. , -5.));
     glm::mat4 NormalMatrix = glm::transpose(glm::inverse(MVMatrix));
     glm::mat4 MVPMatrix = ProjMatrix*MVMatrix;
@@ -80,16 +84,16 @@ int main(int argc, char** argv) {
         mousePos = windowManager.getMousePosition();
 
         if(windowManager.isKeyPressed(SDLK_d)==true){
-            camera.moveLeft(-0.5);
+            camera.moveLeft(-0.05);
         }
         if(windowManager.isKeyPressed(SDLK_q)==true){
-            camera.moveLeft(0.5);
+            camera.moveLeft(0.05);
         }
         if(windowManager.isKeyPressed(SDLK_z)==true){
-            camera.moveFront(0.5);
+            camera.moveFront(0.05);
         }
         if(windowManager.isKeyPressed(SDLK_s)==true){
-            camera.moveFront(-0.5);
+            camera.moveFront(-0.05);
         }
 
         /*********************************
@@ -97,15 +101,19 @@ int main(int argc, char** argv) {
          *********************************/
 
         // couleur de    fond
-        glClearColor(0.2, 0.3, 0.3 ,1);
+        glClearColor(0.5, 0.5, 0.5, 0.);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         ViewMatrix = camera.getViewMatrix() ;
 
-        MVMatrix = glm::mat4(1.f) * ViewMatrix;
+        //dirLightProgram.m_Program.use();
+        //afficherDirLight(dirLightProgram, glm::vec3(0.7, 0.7, 0.7), glm::vec3(0.1, 0.7, 0.1), 0.4, 0.4, ViewMatrix);
 
-        // Rotation de la Terre
+        ponctLightProgram.ponct_Program.use();
+        afficherTorcheLight(ponctLightProgram, glm::vec3(0.9, 0.0, 0.0), glm::vec3(0.9, 0.1, 0.1), 0.9, 0.9, camera.getPosCamera());
+
+        MVMatrix = glm::mat4(1.f) * ViewMatrix;
         NormalMatrix = glm::transpose(glm::inverse(MVMatrix)); 
         MVPMatrix = ProjMatrix*MVMatrix;
 
@@ -114,6 +122,8 @@ int main(int argc, char** argv) {
         glUniformMatrix4fv(uMVPMatrix, 1, GL_FALSE, glm::value_ptr(MVPMatrix));
 
         cube.Draw(ObjProgram);
+
+        
 
         // Update the display
         windowManager.swapBuffers();
