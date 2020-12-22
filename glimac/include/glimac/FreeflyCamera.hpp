@@ -26,7 +26,7 @@ namespace glimac {
 
         public:
             FreeflyCamera(){
-                m_Position = glm::vec3(0., 5., 30.);
+                m_Position = glm::vec3(0., 0., 5.);
                 m_fPhi = glm::pi<float>();
                 m_fTheta = 0.0;
                 computeDirectionVectors();
@@ -59,6 +59,8 @@ namespace glimac {
                 return ViewMatrix;
             }
 
+            inline glm::vec3 getPosCamera(){
+                return m_Position;
+            }
     };
-
 }
