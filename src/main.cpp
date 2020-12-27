@@ -10,6 +10,8 @@
 #include "glimac/FreeflyCamera.hpp"
 
 #include "model.hpp"
+#include "light.hpp"
+#include "objLight.hpp"
 
 using namespace glimac;
 
@@ -26,13 +28,19 @@ int main(int argc, char** argv) {
 
     FilePath applicationPath(argv[0]);
     Program ObjProgram = (loadProgram(applicationPath.dirPath() + "shaders/3D.vs.glsl",
-                              applicationPath.dirPath() + "shaders/normal.fs.glsl"));
+                              applicationPath.dirPath() + "shaders/tex3D.fs.glsl"));
     ObjProgram.use();
 
     GLint uMVPMatrix = glGetUniformLocation(ObjProgram.getGLId(), "uMVPMatrix");
     GLint uMVMatrix = glGetUniformLocation(ObjProgram.getGLId(), "uMVMatrix");
     GLint uNormalMatrix = glGetUniformLocation(ObjProgram.getGLId(), "uNormalMatrix");
-    //GLint uObjTexture = glGetUniformLocation(ObjProgram.getGLId(), "uTexture");
+    GLint uObjTexture = glGetUniformLocation(ObjProgram.getGLId(), "uTexture");
+
+    ObjLightProgram ObjLight(applicationPath);
+
+    ponctLightProgram ponctLightProgram(applicationPath);
+
+    dirLightProgram dirLightProgram(applicationPath);
 
     std::cout << "OpenGL Version : " << glGetString(GL_VERSION) << std::endl;
     std::cout << "GLEW Version : " << glewGetString(GLEW_VERSION) << std::endl;
@@ -44,7 +52,7 @@ int main(int argc, char** argv) {
      *********************************/
 
     // Initialisation objet
-    std::string fileCube = "/home/loona/Bureau/Projet/GLImac-Template/assets/models/cube.obj";
+    std::string fileCube = "/home/loona/Bureau/Projet/GLImac-Template/assets/models/cubeSponge/cubeSponge.obj";
     Model cube(fileCube);
 
     // Déclaration de matrices
@@ -78,32 +86,32 @@ int main(int argc, char** argv) {
         mousePos = windowManager.getMousePosition();
 
         if(windowManager.isKeyPressed(SDLK_d)==true){
-            camera.moveLeft(-0.5);
+            camera.moveLeft(-0.05);
         }
         if(windowManager.isKeyPressed(SDLK_q)==true){
-            camera.moveLeft(0.5);
+            camera.moveLeft(0.05);
         }
         if(windowManager.isKeyPressed(SDLK_z)==true){
-            camera.moveFront(0.5);
+            camera.moveFront(0.05);
         }
         if(windowManager.isKeyPressed(SDLK_s)==true){
-            camera.moveFront(-0.5);
+            camera.moveFront(-0.05);
         }
 
         /*********************************
          * HERE SHOULD COME THE RENDERING CODE
          *********************************/
 
-        // couleur de    fond
-        glClearColor(0.2, 0.3, 0.3 ,1);
-
+        // couleur de fond
+        glClearColor(0.5, 0.5, 0.5, 0.);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         ViewMatrix = camera.getViewMatrix() ;
 
-        MVMatrix = glm::mat4(1.f) * ViewMatrix;
+        //dirLightProgram.m_Program.use();
+        //safficherDirLight(dirLightProgram, glm::vec3(0.7, 0.7, 0.7), glm::vec3(0.1, 0.7, 0.1), 0.4, 20., ViewMatrix);
 
-        // Rotation de la Terre
+        MVMatrix = glm::mat4(1.f) * ViewMatrix;
         NormalMatrix = glm::transpose(glm::inverse(MVMatrix)); 
         MVPMatrix = ProjMatrix*MVMatrix;
 
@@ -112,6 +120,7 @@ int main(int argc, char** argv) {
         glUniformMatrix4fv(uMVPMatrix, 1, GL_FALSE, glm::value_ptr(MVPMatrix));
 
         cube.Draw(ObjProgram);
+
 
         // Update the display
         windowManager.swapBuffers();

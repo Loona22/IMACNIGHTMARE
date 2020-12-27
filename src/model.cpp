@@ -1,4 +1,5 @@
 #include "model.hpp"
+#include "objLight.hpp"
 
 using namespace std;
 
@@ -13,7 +14,7 @@ void Model::Draw(glimac::Program &program){
 void Model::loadModel(const string  &path){
     // read file via ASSIMP
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals);
+    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);
     // check for errors
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
     {
@@ -25,6 +26,7 @@ void Model::loadModel(const string  &path){
 
     // process ASSIMP's root node recursively
     processNode(scene->mRootNode, scene);
+
 }
 
 void Model::processNode(aiNode *node, const aiScene *scene){
@@ -49,6 +51,9 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene){
     vector<Vertex> vertices;
     vector<unsigned int> indices;
     vector<Texture> textures;
+
+    cout << "NumVertices " << mesh->mNumVertices << endl;
+    cout << "NumFaces " << mesh->mNumFaces << endl;
 
     // walk through each of the mesh's vertices
     for(unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -109,7 +114,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene){
     // diffuse: texture_diffuseN
     // specular: texture_specularN
     // normal: texture_normalN
-/*
+
     // 1. diffuse maps
     vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
     textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
@@ -117,12 +122,12 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene){
     vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
     textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
     // 3. normal maps
-    std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+    vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
     textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
     // 4. height maps
-    std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
+    vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
     textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
-    */
+
     // return a mesh object created from the extracted mesh data
     return Mesh(vertices, indices, textures);
 }
@@ -144,6 +149,7 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type,
             {
                 textures.push_back(textures_loaded[j]);
                 skip = true; // a texture with the same filepath has already been loaded, continue to next one. (optimization)
+                std::cout << "Texture chargée" << std::endl;
                 break;
             }
         }
@@ -157,10 +163,9 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type,
             textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
         }
     }
+
     return textures;
 }
-
-// Permet de gérer les textures on peut faire autrement
 
 unsigned int TextureFromFile(const char *path, const string &directory)
 {

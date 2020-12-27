@@ -48,6 +48,7 @@ class Model{
         Mesh processMesh(aiMesh *mesh, const aiScene *scene);
 
         vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, string typeName);
+        
 };
 
 #endif
