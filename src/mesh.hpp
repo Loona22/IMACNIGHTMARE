@@ -48,7 +48,6 @@ public:
     }
 
     // render the mesh
-    // utilise shader.h regarder ce qu'on a qui est équivalent
     void Draw(glimac::Program &program);
 
 private:
