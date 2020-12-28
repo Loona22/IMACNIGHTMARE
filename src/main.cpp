@@ -11,6 +11,7 @@
 
 #include "model.hpp"
 #include "light.hpp"
+#include "objLight.hpp"
 
 using namespace glimac;
 
@@ -27,13 +28,15 @@ int main(int argc, char** argv) {
 
     FilePath applicationPath(argv[0]);
     Program ObjProgram = (loadProgram(applicationPath.dirPath() + "shaders/3D.vs.glsl",
-                              applicationPath.dirPath() + "shaders/normal.fs.glsl"));
+                              applicationPath.dirPath() + "shaders/tex3D.fs.glsl"));
     ObjProgram.use();
 
     GLint uMVPMatrix = glGetUniformLocation(ObjProgram.getGLId(), "uMVPMatrix");
     GLint uMVMatrix = glGetUniformLocation(ObjProgram.getGLId(), "uMVMatrix");
     GLint uNormalMatrix = glGetUniformLocation(ObjProgram.getGLId(), "uNormalMatrix");
-    //GLint uObjTexture = glGetUniformLocation(ObjProgram.getGLId(), "uTexture");
+    GLint uObjTexture = glGetUniformLocation(ObjProgram.getGLId(), "uTexture");
+
+    ObjLightProgram ObjLight(applicationPath);
 
     ponctLightProgram ponctLightProgram(applicationPath);
 
@@ -49,9 +52,8 @@ int main(int argc, char** argv) {
      *********************************/
 
     // Initialisation objet
-    std::string fileCube = "/home/loona/Bureau/Projet/GLImac-Template/assets/models/cube.obj";
+    std::string fileCube = "/home/loona/Bureau/Projet/GLImac-Template/assets/models/cubeSponge/cubeSponge.obj";
     Model cube(fileCube);
-    
 
     // Déclaration de matrices
     glm::mat4 ProjMatrix = glm::perspective(glm::radians(70.f), 800.0f/600.0f, 0.1f, 100.f);
@@ -65,6 +67,17 @@ int main(int argc, char** argv) {
     //création de la trackballCamera
     FreeflyCamera camera;
     glm::mat4 ViewMatrix;
+
+    /***********
+    Initilisation musique
+    **********/
+    Mix_Music *musique;
+    musique = Mix_LoadMUS("../GLImac-Template/assets/musique/son.mp3");
+    if(musique == NULL){
+        std::cout << "Probleme deee chargement musique" << std::endl;
+        return false;
+    }
+    Mix_PlayMusic(musique, -1);
 
     // Application loop:
     bool done = false;
@@ -100,18 +113,11 @@ int main(int argc, char** argv) {
          * HERE SHOULD COME THE RENDERING CODE
          *********************************/
 
-        // couleur de    fond
+        // couleur de fond
         glClearColor(0.5, 0.5, 0.5, 0.);
-
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         ViewMatrix = camera.getViewMatrix() ;
-
-        //dirLightProgram.m_Program.use();
-        //afficherDirLight(dirLightProgram, glm::vec3(0.7, 0.7, 0.7), glm::vec3(0.1, 0.7, 0.1), 0.4, 0.4, ViewMatrix);
-
-        ponctLightProgram.ponct_Program.use();
-        afficherTorcheLight(ponctLightProgram, glm::vec3(0.9, 0.0, 0.0), glm::vec3(0.9, 0.1, 0.1), 0.9, 0.9, camera.getPosCamera());
 
         MVMatrix = glm::mat4(1.f) * ViewMatrix;
         NormalMatrix = glm::transpose(glm::inverse(MVMatrix)); 
@@ -123,13 +129,15 @@ int main(int argc, char** argv) {
 
         cube.Draw(ObjProgram);
 
-        
 
         // Update the display
         windowManager.swapBuffers();
 
         //SDL_Delay(60);
     }
+
+    Mix_FreeMusic(musique);
+    Mix_CloseAudio();
 
     return EXIT_SUCCESS;
 }

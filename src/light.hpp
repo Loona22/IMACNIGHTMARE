@@ -11,7 +11,6 @@
 #include <glimac/Image.hpp>
 #include <glimac/FilePath.hpp>
 
-
 struct ponctLightProgram {
     glimac::Program ponct_Program;
 
@@ -73,9 +72,7 @@ struct dirLightProgram {
     }
 };
 
-//void afficherLight(LightProgram &light, char* couleur, glm::mat4 ViewMatrix);
-
-void afficherLight(ponctLightProgram &light, glm::vec3 Kd, glm::vec3 Ks, float shininess, float intensity, glm::mat4 ViewMatrix);
+void afficherponctLight(ponctLightProgram &light, glm::vec3 Kd, glm::vec3 Ks, float shininess, float intensity, glm::mat4 ViewMatrix);
 
 void afficherDirLight(dirLightProgram &light, glm::vec3 Kd, glm::vec3 Ks, float shininess, float intensity, glm::mat4 ViewMatrix);
 
