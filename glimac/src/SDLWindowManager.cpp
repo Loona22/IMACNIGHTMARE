@@ -12,6 +12,9 @@ SDLWindowManager::SDLWindowManager(uint32_t width, uint32_t height, const char* 
         std::cerr << SDL_GetError() << std::endl;
         return;
     }
+    if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024) == -1){
+        std::cout << Mix_GetError() << std::endl;
+    }
     SDL_WM_SetCaption(title, nullptr);
 }
 
