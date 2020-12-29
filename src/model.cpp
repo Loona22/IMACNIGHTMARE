@@ -1,4 +1,5 @@
 #include "model.hpp"
+#include "objLight.hpp"
 
 using namespace std;
 
